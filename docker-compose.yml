@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: forum
+      POSTGRES_USER: forum
+      POSTGRES_PASSWORD: forum
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - db_net
+
+  api:
+    build: ./api
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://forum:forum@db:5432/forum
+    networks:
+      - internal_net
+      - db_net
+
+  thread:
+    build: ./thread
+    ports:
+      - "80:80"
+    networks:
+      - internal_net
+
+  sender:
+    build: ./sender
+    ports:
+      - "8080:8080"
+    networks:
+      - internal_net
+
+networks:
+  internal_net:
+  db_net:
+
+volumes:
+  db_data:
